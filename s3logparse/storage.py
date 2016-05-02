@@ -9,7 +9,8 @@ class LogStorage(object):
         self.backend = MongoStorage()
         self.bucket_sources = {}
     def get_buckets(self):
-        for src in LogBucketSource.iter_all():
+        skip_names = self.bucket_sources.keys()
+        for src in LogBucketSource.iter_all(skip_names=skip_names):
             self.bucket_sources[src.bucket_name] = src
     def store_entries(self):
         if not len(self.bucket_sources):

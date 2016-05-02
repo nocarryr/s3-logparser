@@ -49,9 +49,11 @@ class LogBucketSource(Bucket):
         if self.logging_status is None:
             self.logging_status = self.bucket.get_logging_status()
     @classmethod
-    def iter_all(cls):
+    def iter_all(cls, skip_names=None):
         c = build_connection()
         for b in c:
+            if skip_names and b.name in skip_names:
+                continue
             logging_status = b.get_logging_status()
             if not hasattr(logging_status, 'LoggingEnabled'):
                 continue
