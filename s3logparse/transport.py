@@ -25,6 +25,7 @@ class Bucket(S3Object):
     def __init__(self, **kwargs):
         self.bucket_name = kwargs.get('bucket_name')
         self.bucket = kwargs.get('bucket')
+        self.config = kwargs.get('config')
     @property
     def bucket(self):
         b = getattr(self, '_bucket', None)
@@ -48,8 +49,13 @@ class LogBucketSource(Bucket):
         self.logging_status = kwargs.get('logging_status')
         if self.logging_status is None:
             self.logging_status = self.bucket.get_logging_status()
+        if self.config is not None:
+            sections = ['buckets', 'log_sources', self.bucket_name]
+            self.config = self.config.root.section(*sections)
+            for key in ['target', 'prefix']:
+                self.config.setdefault(key, getattr(self.logging_status, key))
     @classmethod
-    def iter_all(cls, skip_names=None):
+    def iter_all(cls, skip_names=None, **kwargs):
         c = build_connection()
         for b in c:
             if skip_names and b.name in skip_names:
@@ -57,7 +63,8 @@ class LogBucketSource(Bucket):
             logging_status = b.get_logging_status()
             if not hasattr(logging_status, 'LoggingEnabled'):
                 continue
-            obj = cls(bucket=b, logging_status=logging_status)
+            kwargs.update(dict(bucket=b, logging_status=logging_status))
+            obj = cls(**kwargs)
             yield obj
     @property
     def target(self):

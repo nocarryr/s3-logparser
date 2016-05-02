@@ -2,9 +2,21 @@ import pymongo
 from pymongo import MongoClient
 
 class MongoStorage(object):
+    config_defaults = {
+        'client':{
+            'host':'localhost',
+            'port':27017,
+            'tz_aware':True,
+        },
+        'database':'s3_logparse',
+    }
     def __init__(self, **kwargs):
-        self.client = MongoClient()
-        self.db = self.client.s3_logparse
+        config = kwargs.get('config')
+        self.config = config.root.section('storage_backends', 'mongo')
+        for key, val in self.config_defaults.items():
+            self.config.setdefault(key, val)
+        self.client = MongoClient(**self.config.client)
+        self.db = self.client[self.config.database]
     def add_entry(self, table_name, entry):
         if self.search(table_name, **entry).count():
             return False
