@@ -96,6 +96,6 @@ class LogEntry(object):
             if isinstance(val, datetime.datetime) and dt_to_str:
                 val = val.strftime(DT_FMT)
             elif isinstance(val, datetime.timedelta):
-                val = val.total_seconds() * 1000.
+                val = int(round(val.total_seconds() * 1000.))
             d[key] = val
         return d
