@@ -1,0 +1,3 @@
+[run]
+source = s3logparse
+parallel = True
