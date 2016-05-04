@@ -20,3 +20,10 @@ def test_storage(request, fake_buckets):
     for key, d in fake_buckets['entries'].items():
         key = key.replace('target', 'source')
         assert len(d.values()) == len(entries[key])
+        for fake_entry in d.values():
+            table_name = fake_entry.fields['bucket_name']
+            q = store.backend.search(table_name, request_id=fake_entry.fields['request_id'])
+            assert q.count() == 1
+            db_entry = q[0]
+            for k, v in fake_entry.fields.items():
+                assert db_entry[k] == v
