@@ -2,14 +2,16 @@ from utils import DummyS3Key
 
 
 def test_entries(fake_logs):
+    from s3logparse.transport import LogFile
     from s3logparse.entry import LogEntry
-    p = fake_logs['path']
+    path = fake_logs['path']
     parsed = []
     fake_flat = []
-    for fn, fake_entries in fake_logs['filenames'].items():
-        full_fn = p.join(fn)
-        s3_key = DummyS3Key(str(full_fn))
-        for i, entry in enumerate(LogEntry.entries_from_logfile(s3_key)):
+    for fn, p in fake_logs['paths'].items():
+        fake_entries = fake_logs['filenames'][fn]
+        s3_key = DummyS3Key(p)
+        log_file = LogFile(key=s3_key)
+        for i, entry in enumerate(LogEntry.entries_from_logfile(log_file)):
             fake_entry = fake_entries[i]
             parsed.append(entry)
             fake_flat.append(fake_entry)

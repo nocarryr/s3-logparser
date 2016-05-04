@@ -10,7 +10,8 @@ from s3logparse.entry import FIELD_NAMES
 
 DT_FMT = '[%d/%b/%Y:%H:%M:%S +0000]'
 
-BUCKET_NAMES = ['testbucket_{}'.format(i) for i in range(3)]
+TARGET_BUCKETS = ['target_bucket_{}'.format(i) for i in range(3)]
+SOURCE_BUCKETS = ['source_bucket_{}'.format(i) for i in range(3)]
 
 def random_listitem(l):
     return l[int(random.random() * len(l))]
@@ -63,7 +64,7 @@ class FakeEntry(object):
     def get_value_for_field(self, key):
         val = None
         if key == 'bucket_name':
-            val = random_listitem(BUCKET_NAMES)
+            val = random_listitem(SOURCE_BUCKETS)
         elif key == 'key_name':
             val = self.build_key_name()
         elif key == 'request_id':
@@ -155,14 +156,15 @@ def build_fake_entries(end_dt=None, num_days=5, entries_per_day=100):
     one_minute = datetime.timedelta(minutes=1)
     dt = filename_dt = start_dt
     fn = build_filename(dt)
-    entries = {k:{} for k in BUCKET_NAMES}
+    entries = {k:{} for k in TARGET_BUCKETS}
     filenames = {}
     while dt < end_dt:
         cls = random_listitem(ENTRY_CLASSES)
         entry = cls(datetime=dt)
-        b = entry.fields['bucket_name']
-        entry.filename = os.path.join(b, fn)
-        entries[b][entry._datetime] = entry
+        source_b = entry.fields['bucket_name']
+        target_b = source_b.replace('source', 'target')
+        entry.filename = os.sep.join([target_b, fn])
+        entries[target_b][entry._datetime] = entry
         if entry.filename not in filenames:
             filenames[entry.filename] = []
         filenames[entry.filename].append(entry)
@@ -172,17 +174,24 @@ def build_fake_entries(end_dt=None, num_days=5, entries_per_day=100):
             while filename_dt.day < dt.day:
                 filename_dt -= datetime.timedelta(seconds=1)
             fn = build_filename(filename_dt)
-            filenames[fn] = []
-    return dict(entries=entries, filenames=filenames)
+    return dict(
+        entries=entries,
+        filenames=filenames,
+        target_bucket_names=TARGET_BUCKETS,
+        source_bucket_names=SOURCE_BUCKETS,
+    )
+
 
 def fake_entries_to_path(path, end_dt=None, num_days=5, entries_per_day=100):
     d = build_fake_entries(end_dt, num_days, entries_per_day)
+    d['paths'] = {}
     for fn, entries in d['filenames'].items():
         lines = []
         for e in entries:
             lines.append(e.to_string())
-        p = path.join(fn)
+        fn_split = fn.split(os.sep)
+        p = path.join(*fn_split)
         p.ensure()
-        with open(str(p), 'w') as f:
-            f.write('\n'.join(lines))
+        p.write('\n'.join(lines))
+        d['paths'][fn] = p
     return d
