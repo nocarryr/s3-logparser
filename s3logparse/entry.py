@@ -99,3 +99,7 @@ class LogEntry(object):
                 val = int(round(val.total_seconds() * 1000.))
             d[key] = val
         return d
+    def __repr__(self):
+        return '{}: {}'.format(self.__class__, self)
+    def __str__(self):
+        return str(self._fields)
