@@ -11,6 +11,12 @@
 .collections-nav li{
     flex: auto;
 }
+.pagination{
+    display: inline-flex;
+}
+.pagination a,p{
+    margin: 1em;
+}
 .log-table{
     width: 100%;
     border-collapse: collapse;
@@ -23,6 +29,12 @@
 }
 .field-header{
 
+}
+.field-header-link{
+    display: inline-flex;
+}
+.field-header-link i{
+    margin-left: 1em;
 }
 .log-entry-row{
 

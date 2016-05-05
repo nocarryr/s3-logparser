@@ -74,10 +74,47 @@ def log_collection(slug):
     sort_field = request.args.get('s', '')
     page_num = int(request.args.get('p', '0'))
     per_page = 50
-    qkwargs = dict(skip=page_num*per_page, limit=per_page)
+    total_count = db.search(coll_name).count()
+    total_pages = total_count / per_page
+    start_index = page_num * per_page
+    end_index = start_index + per_page
+    if end_index >= total_count:
+        has_more = False
+        end_index = total_count
+    else:
+        has_more = True
+    url_fmt = '{base_url}?s={sort_field}&p={page}'
+    qkwargs = dict(skip=start_index, limit=per_page)
+    context.update(dict(
+        has_more=has_more,
+        page_num=page_num+1,
+        per_page=per_page,
+        total_pages=total_pages,
+        prev_url=url_fmt.format(
+            base_url=request.base_url,
+            sort_field=sort_field,
+            page=page_num-1,
+        ),
+        next_url=url_fmt.format(
+            base_url=request.base_url,
+            sort_field=sort_field,
+            page=page_num+1,
+        ),
+    ))
+
     if sort_field:
         qkwargs['sort_field'] = sort_field
+        sort_dir = 'up'
+        if sort_field.startswith('+'):
+            sort_dir = 'up'
+            sort_field = sort_field[1:]
+        elif sort_field.startswith('-'):
+            sort_dir = 'down'
+            sort_field = sort_field[1:]
+        context.update(dict(sort_field=sort_field, sort_dir=sort_dir))
+
     context['entry_iter'] = db.get_all_entries(coll_name, **qkwargs)
+
     return render_template('log-collection.html', **context)
 
 if __name__ == '__main__':

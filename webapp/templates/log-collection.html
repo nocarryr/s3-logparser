@@ -1,11 +1,30 @@
 {% extends "base.html" %}
 
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
+{% endblock %}
+
+{% macro sort_icon_class(field_name) -%}
+fa fa-sort{% if sort_field == field_name %}{% if sort_dir == 'up' %}-up{% else %}-down{% endif %}{% endif %}
+{%- endmacro %}
+
 {% block main %}
+<div class="pagination">
+    <a{% if page_num > 1 %} href="{{ prev_url }}"{% endif %}>Previous <i class="fa fa-arrow-left"></i></a>
+    <p>Page {{ page_num }} of {{ total_pages }}</p>
+    <a {% if not has_more %}disabled {% endif %}href="{{ next_url }}">Next <i class="fa fa-arrow-right"></i></a>
+</div>
+
 <table class="log-table">
     <thead><tr>
         {% for field_name in field_names %}
             <td class="field-header{% if field_name in hidden_fields %} hidden{% endif %}"
-                data-field-name="{{ field_name }}">{{ field_name|title }}</td>
+                data-field-name="{{ field_name }}">
+                <a class="field-header-link" href="#">{{ field_name|title }}
+                    <i class="{{ sort_icon_class(field_name) }}" aria-hidden="true"></i>
+                </a>
+            </td>
         {% endfor %}
     </tr></thead>
     <tbody>
