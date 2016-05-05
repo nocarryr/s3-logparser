@@ -1,0 +1,35 @@
+.collections-nav{
+    display: flex;
+    flex-direction: row;
+}
+.collections-nav ul{
+    flex: auto;
+    flex-direction: row;
+    display: flex;
+    list-style-type: none;
+}
+.collections-nav li{
+    flex: auto;
+}
+.log-table{
+    width: 100%;
+    border-collapse: collapse;
+}
+.log-table th,td{
+    border-width: 1px;
+    border-style: solid;
+    font-family: monospace;
+    font-size:.85em;
+}
+.field-header{
+
+}
+.log-entry-row{
+
+}
+.log-entry-field{
+
+}
+.hidden{
+    display: none;
+}

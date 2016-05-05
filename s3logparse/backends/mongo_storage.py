@@ -61,14 +61,26 @@ class MongoStorage(object):
         with self as db:
             names = db.collection_names()
         return [name for name in names if name != 'system.indexes']
-    def get_all_entries(self, *table_names):
+    def get_all_entries(self, *table_names, **kwargs):
+        sort_field = kwargs.pop('sort_field', '+datetime')
+        sort_dir = pymongo.ASCENDING
+        if sort_field.startswith('+'):
+            sort_dir = pymongo.ASCENDING
+            sort_field = sort_field[1:]
+        elif sort_field.startswith('-'):
+            sort_dir = pymongo.DESCENDING
+            sort_field = sort_field[1:]
         with self as db:
             if not len(table_names):
                 table_names = self.get_log_collections()
             for table_name in table_names:
                 coll = db[table_name]
-                for entry in coll.find().sort('datetime', pymongo.ASCENDING):
+                for entry in coll.find(**kwargs).sort(sort_field, sort_dir):
                     yield table_name, entry
+    def get_fields(self, table_name):
+        with self as db:
+            e = db[table_name].find_one()
+        return e.keys()
     def search(self, table_name, **kwargs):
         with self as db:
             coll = db[table_name]
