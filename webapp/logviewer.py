@@ -115,6 +115,7 @@ def log_collection(slug):
         context.update(dict(sort_field=sort_field, sort_dir=sort_dir))
 
     context['entry_iter'] = coll.search(**qkwargs)
+    context['collection_name'] = coll_name
 
     return render_template('log-collection.html', **context)
 

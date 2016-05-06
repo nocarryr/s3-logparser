@@ -1,4 +1,30 @@
 $(function(){
+    var storeFilters = function(){
+        var fieldNames = [],
+            storeKey = [$("table").data('collectionName'), 'filters'].join('_');
+        $(".active-fields button.active").each(function(){
+            fieldNames.push($(this).data('fieldName'));
+        });
+        localStorage.setItem(storeKey, JSON.stringify(fieldNames));
+    }
+    var getFilters = function(){
+        var storeKey = [$("table").data('collectionName'), 'filters'].join('_'),
+            fieldNames = localStorage.getItem(storeKey);
+        if (fieldNames === null){
+            return;
+        }
+        fieldNames = JSON.parse(fieldNames);
+        $.each(fieldNames, function(i, fieldName){
+            var $btn = $(".active-fields").data('buttons')[fieldName];
+            if ($btn.hasClass('active')){
+                return;
+            }
+            $btn
+                .addClass('active')
+                .data('fieldHeader').trigger('setHidden', [true]);
+        });
+    };
+
     $(".log-entry-field[data-field-name=datetime]").each(function(){
         var $td = $(this),
             d = new Date($td.text());
@@ -40,6 +66,7 @@ $(function(){
             hidden = !$btn.hasClass('active')
         $header.trigger('setHidden', [hidden]);
         $btn.toggleClass('active');
+        storeFilters();
     });
 
     $(".log-entry-field").each(function(){
@@ -71,5 +98,7 @@ $(function(){
             $(this).removeClass('hidden');
         }
     });
+
+    getFilters();
 
 });
