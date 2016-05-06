@@ -25,6 +25,40 @@ $(function(){
             }
         });
     };
+    var getUrlQuery = function(url){
+        var query = {};
+        if (typeof(url) == 'undefined'){
+            url = window.location.href;
+        }
+        url = url.replace('#', '');
+        if (url.split('?').length > 1){
+            $.each(url.split('?')[1].split('&'), function(i, qstr){
+                query[qstr.split('=')[0]] = qstr.split('=')[1];
+            });
+            url = url.split('?')[0];
+        }
+        return {'url':url, 'query':query};
+    };
+    var setLocation = function(data){
+        var current = getUrlQuery(),
+            currentQuery = current.query;
+        if (typeof(data) == 'string'){
+            data = {'url':data};
+        } else if ($.isPlainObject(data) && typeof(data.url) == 'undefined'){
+            data = {'query':data};
+        }
+        if (typeof(data.query) == 'undefined'){
+            data.query = {};
+        }
+        if (typeof(data.url) == 'undefined'){
+            data.url = current.url;
+        }
+        $.each(data.query, function(key,val){
+            currentQuery[key] = val;
+        });
+        url = [data.url, $.param(currentQuery)].join('?');
+        window.location = url;
+    };
 
     $(".log-entry-field[data-field-name=datetime]").each(function(){
         var $td = $(this),
@@ -33,17 +67,9 @@ $(function(){
     });
     $(".field-header-link").click(function(e){
         var $this = $(this),
-            url = window.location.href,
             $i = $("i", $this),
             fieldName = $this.parent().data('fieldName'),
             query = {};
-        url = url.replace('#', '');
-        if (url.split('?').length > 1){
-            $.each(url.split('?')[1].split('&'), function(i, qstr){
-                query[qstr.split('=')[0]] = qstr.split('=')[1];
-            });
-            url = url.split('?')[0];
-        }
         e.preventDefault();
         if ($i.hasClass('fa-sort-up')){
             query.s = '-' + fieldName;
@@ -52,8 +78,7 @@ $(function(){
         } else {
             query.s = fieldName;
         }
-        url = [url, $.param(query)].join('?');
-        window.location = url;
+        setLocation(query);
     });
 
     $(".active-fields").data('buttons', {});
