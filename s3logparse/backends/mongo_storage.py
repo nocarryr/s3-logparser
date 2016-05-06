@@ -82,4 +82,4 @@ class MongoLogCollection(LogCollectionBase):
     def search(self, **kwargs):
         kwargs, sort_field, sort_dir = self._prepare_sort(**kwargs)
         with self as coll:
-            return coll.find(kwargs).sort(sort_field, sort_dir)
+            return coll.find(**kwargs).sort(sort_field, sort_dir)
