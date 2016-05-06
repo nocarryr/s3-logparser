@@ -2,7 +2,7 @@ $(function(){
     var storeFilters = function(){
         var fieldNames = [],
             storeKey = [$("table").data('collectionName'), 'filters'].join('_');
-        $(".active-fields button.active").each(function(){
+        $(".active-fields button:not(.active)").each(function(){
             fieldNames.push($(this).data('fieldName'));
         });
         localStorage.setItem(storeKey, JSON.stringify(fieldNames));
@@ -14,14 +14,15 @@ $(function(){
             return;
         }
         fieldNames = JSON.parse(fieldNames);
-        $.each(fieldNames, function(i, fieldName){
-            var $btn = $(".active-fields").data('buttons')[fieldName];
-            if ($btn.hasClass('active')){
-                return;
+        $(".active-fields button").each(function(){
+            var $btn = $(this);
+            if (fieldNames.indexOf($btn.data('fieldName')) != -1){
+                $btn.removeClass('active')
+                    .data('fieldHeader').trigger('setHidden', [true]);
+            } else {
+                $btn.addClass('active')
+                    .data('fieldHeader').trigger('setHidden', [false]);
             }
-            $btn
-                .addClass('active')
-                .data('fieldHeader').trigger('setHidden', [true]);
         });
     };
 
@@ -63,7 +64,7 @@ $(function(){
     }).click(function(){
         var $btn = $(this),
             $header = $btn.data('fieldHeader'),
-            hidden = !$btn.hasClass('active')
+            hidden = $btn.hasClass('active')
         $header.trigger('setHidden', [hidden]);
         $btn.toggleClass('active');
         storeFilters();

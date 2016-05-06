@@ -50,7 +50,7 @@ fa fa-sort{% if sort_field == field_name %}{% if sort_dir == 'up' %}-up{% else %
             <li>
                 <button
                     type="button"
-                    class="button{% if field_name in hidden_fields %} active{% endif %}"
+                    class="button"
                     data-field-name="{{ field_name }}">{{ field_name|title }}
                 </button>
             </li>
