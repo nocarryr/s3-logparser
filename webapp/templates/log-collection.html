@@ -10,7 +10,7 @@ fa fa-sort{% if sort_field == field_name %}{% if sort_dir == 'up' %}-up{% else %
 {%- endmacro %}
 
 {% block main %}
-<div class="pagination">
+<div class="pagination panel">
     <a{% if page_num > 1 %} href="{{ prev_url }}"{% endif %}>Previous <i class="fa fa-arrow-left"></i></a>
     <p>Page {{ page_num }} of {{ total_pages }}</p>
     <a {% if not has_more %}disabled {% endif %}href="{{ next_url }}">Next <i class="fa fa-arrow-right"></i></a>
