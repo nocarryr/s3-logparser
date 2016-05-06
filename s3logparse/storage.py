@@ -2,14 +2,14 @@ import os
 
 from s3logparse.transport import LogBucketSource
 from s3logparse.entry import LogEntry
-from s3logparse.backends.mongo_storage import MongoStorage
+from s3logparse.backends import build_backend
 
 class LogStorage(object):
     def __init__(self, config):
         self.config = config.root.section('log_storage')
         self.config.setdefault('skip_search', False)
         self.config.setdefault('delete_logfiles', True)
-        self.backend = MongoStorage(config=self.config)
+        self.backend = build_backend(config)
         self.bucket_sources = {}
         conf_buckets = self.config.get('bucket_sources')
         if conf_buckets is not None:
