@@ -11,6 +11,28 @@
 .collections-nav li{
     flex: auto;
 }
+.row{
+    display: flex;
+    flex-flow: row;
+}
+.row > .main{
+    flex: 0 0 80%;
+    order: 1;
+    max-width: 80%;
+    overflow-x: scroll;
+}
+.row > .sidebar{
+    flex: 0 0 20%;
+    order: 2;
+    max-width: 20%;
+}
+.sidebar{
+    display: flex;
+    flex-direction: column;
+}
+.sidebar ul{
+    list-style-type: none;
+}
 .pagination{
     display: inline-flex;
 }
@@ -18,7 +40,6 @@
     margin: 1em;
 }
 .log-table{
-    width: 100%;
     border-collapse: collapse;
 }
 .log-table th,td{
@@ -44,4 +65,13 @@
 }
 .hidden{
     display: none;
+}
+.button{
+    background-color: rgb(200, 200, 200);
+    width: 100%;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+.button.active{
+    background-color: rgb(210, 210, 255);
 }

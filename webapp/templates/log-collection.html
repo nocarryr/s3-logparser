@@ -20,6 +20,7 @@ fa fa-sort{% if sort_field == field_name %}{% if sort_dir == 'up' %}-up{% else %
     <thead><tr>
         {% for field_name in field_names %}
             <td class="field-header{% if field_name in hidden_fields %} hidden{% endif %}"
+                id="{{ field_name }}_header"
                 data-field-name="{{ field_name }}">
                 <a class="field-header-link" href="#">{{ field_name|title }}
                     <i class="{{ sort_icon_class(field_name) }}" aria-hidden="true"></i>
@@ -28,7 +29,7 @@ fa fa-sort{% if sort_field == field_name %}{% if sort_dir == 'up' %}-up{% else %
         {% endfor %}
     </tr></thead>
     <tbody>
-        {% for table_name, entry in entry_iter %}
+        {% for entry in entry_iter %}
             <tr class="log-entry-row" data-object-id="{{ entry._id }}">
                 {% for field_name in field_names %}
                     <td class="log-entry-field{% if field_name in hidden_fields %} hidden{% endif %}"
@@ -39,6 +40,23 @@ fa fa-sort{% if sort_field == field_name %}{% if sort_dir == 'up' %}-up{% else %
         {% endfor %}
     </tbody>
 </table>
+{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-item">
+    <h2>Active Fields</h2>
+    <ul class="active-fields">
+        {% for field_name in field_names %}
+            <li>
+                <button
+                    type="button"
+                    class="button{% if field_name in hidden_fields %} active{% endif %}"
+                    data-field-name="{{ field_name }}">{{ field_name|title }}
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
 
 {% block js_foot %}

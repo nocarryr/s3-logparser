@@ -28,4 +28,48 @@ $(function(){
         url = [url, $.param(query)].join('?');
         window.location = url;
     });
+
+    $(".active-fields").data('buttons', {});
+
+    $(".active-fields button").each(function(){
+        var $btn = $(this);
+        $(".active-fields").data('buttons')[$btn.data('fieldName')] = $btn;
+    }).click(function(){
+        var $btn = $(this),
+            $header = $btn.data('fieldHeader'),
+            hidden = !$btn.hasClass('active')
+        $header.trigger('setHidden', [hidden]);
+        $btn.toggleClass('active');
+    });
+
+    $(".log-entry-field").each(function(){
+        var $this = $(this),
+            $header = $("#F_header".replace('F', $this.data('fieldName'))),
+            $filterBtn = $(".active-fields").data('buttons')[$this.data('fieldName')];
+        $header
+            .data('entryField', $this)
+            .on('setHidden', function(e, hidden){
+                if (hidden){
+                    $this.addClass('hidden');
+                } else {
+                    $this.removeClass('hidden');
+                }
+            });
+        $filterBtn.data('entryField', $this);
+    });
+    $(".field-header").each(function(){
+        var $this = $(this),
+            $filterBtn = $(".active-fields").data('buttons')[$this.data('fieldName')];
+        $filterBtn.data('fieldHeader', $this);
+        if ($this.hasClass('hidden')){
+            $filterBtn.addClass('active');
+        }
+    }).on('setHidden', function(e, hidden){
+        if (hidden){
+            $(this).addClass('hidden');
+        } else {
+            $(this).removeClass('hidden');
+        }
+    });
+
 });
