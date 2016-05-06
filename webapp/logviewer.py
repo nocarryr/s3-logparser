@@ -72,10 +72,15 @@ def log_collection(slug):
         'client_id',
         'owner_id',
     ]
+    filter_field = request.args.get('filter_field', None)
+    filter_value = request.args.get('filter_value', None)
+    filt = {}
+    if filter_field:
+        filt[filter_field] = filter_value
     sort_field = request.args.get('s', '')
     page_num = int(request.args.get('p', '0'))
     per_page = 50
-    total_count = coll.search().count()
+    total_count = coll.search(filt).count()
     total_pages = total_count / per_page
     start_index = page_num * per_page
     end_index = start_index + per_page
@@ -114,7 +119,7 @@ def log_collection(slug):
             sort_field = sort_field[1:]
         context.update(dict(sort_field=sort_field, sort_dir=sort_dir))
 
-    context['entry_iter'] = coll.search(**qkwargs)
+    context['entry_iter'] = coll.search(filt, **qkwargs)
     context['collection_name'] = coll_name
 
     return render_template('log-collection.html', **context)

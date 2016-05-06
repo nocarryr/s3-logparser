@@ -3,6 +3,7 @@
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.1.0/jquery.contextMenu.min.css">
 {% endblock %}
 
 {% macro sort_icon_class(field_name) -%}
@@ -61,5 +62,6 @@ fa fa-sort{% if sort_field == field_name %}{% if sort_dir == 'up' %}-up{% else %
 
 {% block js_foot %}
 {{ super() }}
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.1.0/jquery.contextMenu.min.js"></script>
 <script src="{{ url_for('static', filename='js/log-collection.js') }}"></script>
 {% endblock %}

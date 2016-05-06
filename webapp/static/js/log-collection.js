@@ -127,4 +127,35 @@ $(function(){
 
     getFilters();
 
+
+    $.contextMenu({
+        selector: ".log-entry-field",
+        items:{
+            'filter':{
+                name: 'Filter by this value',
+                callback: function(key, opt){
+                    var $td = opt.$trigger;
+                    setLocation({
+                        p:0,
+                        filter_field:$td.data('fieldName'),
+                        filter_value:$td.data('fieldValue'),
+                    });
+                },
+            },
+            'clearFilter':{
+                name: 'Clear filters',
+                callback: function(key, opt){
+                    console.log(getUrlQuery());
+                    if (typeof(getUrlQuery().query.filter_field) == 'undefined'){
+                        return;
+                    }
+                    setLocation({
+                        p:0,
+                        filter_field:'',
+                        filter_value:'',
+                    });
+                },
+            },
+        },
+    });
 });
