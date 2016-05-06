@@ -33,11 +33,25 @@ $(function(){
         url = url.replace('#', '');
         if (url.split('?').length > 1){
             $.each(url.split('?')[1].split('&'), function(i, qstr){
-                query[qstr.split('=')[0]] = qstr.split('=')[1];
+                var key = qstr.split('=')[0],
+                    val = qstr.split('=')[1];
+                if (!val.length){
+                    return;
+                }
+                query[key] = decodeURIComponent(val);
             });
             url = url.split('?')[0];
         }
         return {'url':url, 'query':query};
+    };
+    var buildQueryStr = function(data){
+        var l = [];
+        $.each(data, function(key, val){
+            key = encodeURIComponent(key);
+            val = encodeURIComponent(val);
+            l.push([key, val].join('='));
+        });
+        return l.join('&');
     };
     var setLocation = function(data){
         var current = getUrlQuery(),
@@ -56,7 +70,7 @@ $(function(){
         $.each(data.query, function(key,val){
             currentQuery[key] = val;
         });
-        url = [data.url, $.param(currentQuery)].join('?');
+        url = [data.url, buildQueryStr(currentQuery)].join('?');
         window.location = url;
     };
 
