@@ -89,3 +89,6 @@ class MongoLogCollection(LogCollectionBase):
         kwargs.setdefault('filter', filt)
         with self as coll:
             return coll.find(**kwargs).sort(sort_field, sort_dir)
+    def unique_values(self, field_name, filt=None, **kwargs):
+        with self as coll:
+            return self.search(filt, **kwargs).distinct(field_name)

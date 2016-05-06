@@ -88,6 +88,10 @@ class BackendBase(ReentrantContext):
         with self as db:
             coll = self.get_collection(table_name)
             return coll.search(filt, **kwargs)
+    def unique_values(self, table_name, field_name, filt=None, **kwargs):
+        with self as db:
+            coll = self.get_collection(table_name)
+            return coll.unique_values(filt, field_name, **kwargs)
 
 class LogCollectionBase(ReentrantContext):
     def __init__(self, **kwargs):
@@ -102,4 +106,6 @@ class LogCollectionBase(ReentrantContext):
     def get_fields(self):
         raise NotImplementedError('must be defined by subclass')
     def search(self, filt=None, **kwargs):
+        raise NotImplementedError('must be defined by subclass')
+    def unique_values(self, field_name, filt=None, **kwargs):
         raise NotImplementedError('must be defined by subclass')
