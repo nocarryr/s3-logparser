@@ -114,3 +114,13 @@ a:hover{
 .button.active:hover{
     background-color: hsl(224, 100%, 87%);
 }
+.field-values{
+    list-style-type: none;
+}
+.field-values li{
+    border-width: 1px;
+    border-style: solid;
+    font-family: monospace;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}

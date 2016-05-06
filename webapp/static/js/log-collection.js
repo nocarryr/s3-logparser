@@ -182,6 +182,22 @@ $(function(){
                     });
                 },
             },
+            'uniques':{
+                name:'Show all values for this field',
+                callback: function(key, opt){
+                    var $td = opt.$trigger;
+                    window.location = $td.data('uniquesHref');
+                },
+            },
         },
     });
+
+    $(".field-values li a").each(function(){
+        var $this = $(this),
+            query = {};
+        query.filter_field = $(".field-values").data('fieldName');
+        query.filter_value = $this.text();
+        $this.attr('href', [$this.attr('href'), buildQueryStr(query)].join('?'));
+    });
+
 });

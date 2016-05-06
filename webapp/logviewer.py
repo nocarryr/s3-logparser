@@ -106,6 +106,7 @@ def log_collection(slug):
             sort_field=sort_field,
             page=page_num+1,
         ),
+        slug=slug,
     ))
 
     if sort_field:
@@ -123,6 +124,20 @@ def log_collection(slug):
     context['collection_name'] = coll_name
 
     return render_template('log-collection.html', **context)
+
+@app.route('/unique-field-values/<slug>/<field_name>')
+def unique_field_values(slug, field_name):
+    context = get_site_context()
+    coll_name = context['log_collections'][slug]['name']
+    db = get_db()
+    coll = db.get_collection(coll_name)
+    context.update(dict(
+        collection_name=coll_name,
+        slug=slug,
+        field_name=field_name,
+        values=coll.unique_values(field_name)
+    ))
+    return render_template('unique-field-values.html', **context)
 
 if __name__ == '__main__':
     app.run()
