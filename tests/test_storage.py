@@ -11,7 +11,7 @@ def test_storage(request, fake_buckets):
             store.backend.client.drop_database('s3_logparse_test')
     request.addfinalizer(remove_db)
     assert len(store.bucket_sources)
-    assert len(store.backend.get_log_collections()) == 0
+    assert len(store.backend.collections) == 0
     store.store_entries()
     entries = {}
     with store.backend:
