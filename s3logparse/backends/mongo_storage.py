@@ -48,7 +48,7 @@ class MongoLogCollection(LogCollectionBase):
         self.backend.release()
     def add_entry(self, entry):
         with self as coll:
-            if self.search(**entry).count():
+            if self.search(entry).count():
                 return False
             r = coll.insert_one(entry)
         return r
@@ -70,16 +70,22 @@ class MongoLogCollection(LogCollectionBase):
             sort_dir = pymongo.DESCENDING
             sort_field = sort_field[1:]
         return kwargs, sort_field, sort_dir
-    def get_all_entries(self, **kwargs):
+    def get_all_entries(self, filt=None, **kwargs):
         kwargs, sort_field, sort_dir = self._prepare_sort(**kwargs)
+        if filt is None:
+            filt = {}
+        kwargs.setdefault('filter', filt)
         with self as coll:
-            for e in coll.find().sort(sort_field, sort_dir):
+            for e in coll.find(**kwargs).sort(sort_field, sort_dir):
                 yield e
     def get_fields(self):
         with self as coll:
             e = coll.find_one()
         return e.keys()
-    def search(self, **kwargs):
+    def search(self, filt=None, **kwargs):
         kwargs, sort_field, sort_dir = self._prepare_sort(**kwargs)
+        if filt is None:
+            filt = {}
+        kwargs.setdefault('filter', filt)
         with self as coll:
             return coll.find(**kwargs).sort(sort_field, sort_dir)

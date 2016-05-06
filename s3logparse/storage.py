@@ -35,7 +35,7 @@ class LogStorage(object):
                 for log_fn, logfile in src.iter_logfiles():
                     entries = set([e for e in LogEntry.entries_from_logfile(logfile)])
                     for entry in entries.copy():
-                        r = self.backend.search(name, **entry._serialize())
+                        r = self.backend.search(name, filt=entry._serialize())
                         if r.count():
                             existing += 1
                             entries.discard(entry)

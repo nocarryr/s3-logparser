@@ -27,7 +27,9 @@ def test_storage(request, fake_buckets):
                 table_name = fake_entry.fields['bucket_name']
                 q = store.backend.search(
                     table_name,
-                    request_id=fake_entry.fields['request_id'],
+                    filt=dict(
+                        request_id=fake_entry.fields['request_id'],
+                    ),
                 )
                 assert q.count() == 1
                 db_entry = q[0]
