@@ -74,6 +74,18 @@ $(function(){
         window.location = url;
     };
 
+    $(".pagination a").each(function(){
+        var $a = $(this),
+            urlData = getUrlQuery($a.attr('href'));
+        $.each(getUrlQuery().query, function(key, val){
+            if (key == 'p'){
+                return;
+            }
+            urlData.query[key] = val;
+        });
+        $a.attr('href', [urlData.url, buildQueryStr(urlData.query)].join('?'));
+    });
+
     $(".log-entry-field[data-field-name=datetime]").each(function(){
         var $td = $(this),
             d = new Date($td.text());
