@@ -45,6 +45,8 @@ def test_storage(dbstore):
                     assert db_entry[k] == v
 
 def test_dbops(dbstore):
+    from s3logparse.entry import FIELD_NAMES
+    all_fields = set(FIELD_NAMES)
     store = dbstore['store']
     store.store_entries()
     fake_entries = dbstore['entries']
@@ -64,6 +66,14 @@ def test_dbops(dbstore):
     with store.backend:
         for coll_name in coll_names:
             coll = store.backend.get_collection(coll_name)
+            dbfields = set(coll.get_fields())
+
+            # remove any fields added by backend (_id or pk fields)
+            # we only want to make sure the fields we want exist
+            extra_fields = dbfields - all_fields
+            dbfields -= extra_fields
+            assert dbfields == all_fields
+
             for field in field_names:
                 q = coll.unique_values(field)
                 assert len(q) == len(fake_fields[coll_name][field])
