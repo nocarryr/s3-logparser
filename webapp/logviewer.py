@@ -72,11 +72,13 @@ def log_collection(slug):
         'client_id',
         'owner_id',
     ]
-    filter_field = request.args.get('filter_field', None)
-    filter_value = request.args.get('filter_value', None)
     filt = {}
-    if filter_field:
-        filt[filter_field] = filter_value
+    arg_iter = zip(request.args.getlist('filter_field'),
+                   request.args.getlist('filter_value'))
+    for f_field, f_val in arg_iter:
+        if not f_val:
+            continue
+        filt[f_field] = f_val
     sort_field = request.args.get('s', '')
     page_num = int(request.args.get('p', '0'))
     per_page = 50

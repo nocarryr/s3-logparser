@@ -38,7 +38,16 @@ $(function(){
                 if (!val.length){
                     return;
                 }
-                query[key] = decodeURIComponent(val);
+                val = decodeURIComponent(val);
+                if (typeof(query[key]) != 'undefined'){
+                    if (!$.isPlainObject(query[key])){
+                        query[key] = [val];
+                    } else {
+                        query[key].push(val);
+                    }
+                } else {
+                    query[key] = val;
+                }
             });
             url = url.split('?')[0];
         }
@@ -48,8 +57,15 @@ $(function(){
         var l = [];
         $.each(data, function(key, val){
             key = encodeURIComponent(key);
-            val = encodeURIComponent(val);
-            l.push([key, val].join('='));
+            if ($.isArray(val)){
+                $.each(val, function(i, v){
+                    v = encodeURIComponent(v);
+                    l.push([key, v].join('='));
+                });
+            } else {
+                val = encodeURIComponent(val);
+                l.push([key, val].join('='));
+            }
         });
         return l.join('&');
     };
@@ -67,7 +83,7 @@ $(function(){
         if (typeof(data.url) == 'undefined'){
             data.url = current.url;
         }
-        $.each(data.query, function(key,val){
+        $.each(data.query, function(key, val){
             currentQuery[key] = val;
         });
         url = [data.url, buildQueryStr(currentQuery)].join('?');
@@ -160,12 +176,21 @@ $(function(){
             'filter':{
                 name: 'Filter by this value',
                 callback: function(key, opt){
-                    var $td = opt.$trigger;
-                    setLocation({
-                        p:0,
-                        filter_field:$td.data('fieldName'),
-                        filter_value:$td.data('fieldValue'),
-                    });
+                    var $td = opt.$trigger,
+                        urlData = getUrlQuery();
+                    if (typeof(urlData.query.filter_field) != 'undefined'){
+                        if (!$.isArray(urlData.query.filter_field)){
+                            urlData.query.filter_field = [urlData.query.filter_field];
+                            urlData.query.filter_value = [urlData.query.filter_value];
+                        }
+                        urlData.query.filter_field.push($td.data('fieldName'));
+                        urlData.query.filter_value.push($td.data('fieldValue'));
+                    } else {
+                        urlData.query.filter_field = $td.data('fieldName');
+                        urlData.query.filter_value = $td.data('fieldValue');
+                    }
+                    urlData.query.p = 0;
+                    setLocation(urlData.query);
                 },
             },
             'clearFilter':{
