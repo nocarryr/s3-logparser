@@ -3,7 +3,7 @@ from utils import DummyS3Key
 
 def test_entries(fake_logs):
     from s3logparse.transport import LogFile
-    from s3logparse.entry import LogEntry
+    from s3logparse.entry import LogEntry, FIELD_NAMES
     path = fake_logs['path']
     parsed = []
     fake_flat = []
@@ -16,7 +16,8 @@ def test_entries(fake_logs):
             parsed.append(entry)
             fake_flat.append(fake_entry)
             d = entry._serialize()
-            for key, fake_val in fake_entry.fields.items():
+            for key in FIELD_NAMES:
+                fake_val = fake_entry.fields[key]
                 assert entry._fields[key] == entry[key] == getattr(entry, key)
                 val = d[key]
                 if isinstance(val, float):
