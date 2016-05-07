@@ -1,12 +1,28 @@
 import pytest
 
-@pytest.fixture
-def dbstore(request, fake_buckets):
+def build_config(conf_fn, bucket_sources=None):
     from s3logparse.config import Config
-    from s3logparse.storage import LogStorage
-    conf_fn = fake_buckets['tmpdir'].join('config-test.conf')
     c = Config(str(conf_fn))
     c.section('storage_backends', 'mongo')['database'] = 's3_logparse_test'
+    if bucket_sources is not None:
+        c.section('log_storage')['bucket_sources'] = bucket_sources
+    c.write()
+    c = Config(str(conf_fn))
+    return c
+
+@pytest.fixture(params=['clean', 'preconfigured'])
+def dbstore(request, fake_buckets):
+    from s3logparse.storage import LogStorage
+    conf_fn = fake_buckets['tmpdir'].join('config-test.conf')
+    if request.param == 'preconfigured':
+        fake_entries = fake_buckets['entries']
+        d = {}
+        for target in fake_entries.keys():
+            source = target.replace('target', 'source')
+            d[source] = dict(bucket_name=source, target=target)
+    else:
+        d = None
+    c = build_config(conf_fn, bucket_sources=d)
     store = LogStorage(c)
     def remove_db():
         with store.backend:
