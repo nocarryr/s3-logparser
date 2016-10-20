@@ -3,6 +3,7 @@ from werkzeug.local import LocalProxy
 
 from s3logparse.main import build_config
 from s3logparse.backends import mongo_storage
+from s3logparse.entry import FIELD_NAMES
 
 BACKEND_CONFIG = build_config()
 DEBUG = True
@@ -66,7 +67,7 @@ def log_collection(slug):
     coll_name = context['log_collections'][slug]['name']
     db = get_db()
     coll = db.get_collection(coll_name)
-    context['field_names'] = sorted(coll.get_fields())
+    context['field_names'] = sorted(FIELD_NAMES)
     context['hidden_fields'] = [
         '_id',
         'client_id',
