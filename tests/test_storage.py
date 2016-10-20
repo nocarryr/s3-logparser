@@ -1,11 +1,15 @@
+import os
 import pytest
 
 def build_config(conf_fn, bucket_sources=None):
     from s3logparse.config import Config
     c = Config(str(conf_fn))
     c.section('storage_backends', 'mongo')['database'] = 's3_logparse_test'
+    c.section('log_storage')
     if bucket_sources is not None:
-        c.section('log_storage')['bucket_sources'] = bucket_sources
+        log_sources = c.section('buckets').section('log_sources')
+        for source, d in bucket_sources.items():
+            log_sources.section(source)._data.update(d)
     c.write()
     c = Config(str(conf_fn))
     return c
@@ -19,7 +23,8 @@ def dbstore(request, fake_buckets):
         d = {}
         for target in fake_entries.keys():
             source = target.replace('target', 'source')
-            d[source] = dict(bucket_name=source, target=target)
+            target = ''.join([target, os.sep])
+            d[source] = dict(prefix=source, target=target)
     else:
         d = None
     c = build_config(conf_fn, bucket_sources=d)

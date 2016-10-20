@@ -42,6 +42,13 @@ class FakeEntry(object):
         self._datetime = dt
         kwargs['datetime'] = dt.replace(microsecond=0)
         self.fields = self.build_field_defaults(**kwargs)
+    @property
+    def filename(self):
+        return getattr(self, '_filename', None)
+    @filename.setter
+    def filename(self, value):
+        self._filename = value
+        self.fields['log_filename'] = value
     def build_field_defaults(self, **kwargs):
         for key in FIELD_NAMES:
             if key in kwargs:
