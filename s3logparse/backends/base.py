@@ -64,7 +64,7 @@ class BackendBase(ReentrantContext):
     def add_entry(self, table_name, entry):
         with self:
             coll = self.get_collection(table_name)
-            r = coll.add_entry(self)
+            r = coll.add_entry(entry)
         return r
     def add_entries(self, table_name, *entries):
         with self:
