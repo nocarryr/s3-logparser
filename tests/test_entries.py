@@ -11,7 +11,7 @@ def test_entries(fake_logs):
         fake_entries = fake_logs['filenames'][fn]
         s3_key = DummyS3Key(p)
         log_file = LogFile(key=s3_key)
-        for i, entry in enumerate(LogEntry.entries_from_logfile(log_file)):
+        for i, entry in enumerate(LogEntry.entries_from_logfile(log_file, fn)):
             fake_entry = fake_entries[i]
             parsed.append(entry)
             fake_flat.append(fake_entry)

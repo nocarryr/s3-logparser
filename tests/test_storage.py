@@ -63,7 +63,8 @@ def test_storage(dbstore):
                 assert q.count() == 1
                 db_entry = q[0]
                 for k, v in fake_entry.fields.items():
-                    assert db_entry[k] == v
+                    if k != 'log_filename':
+                        assert db_entry[k] == v
 
 def test_dbops(dbstore):
     from s3logparse.entry import FIELD_NAMES

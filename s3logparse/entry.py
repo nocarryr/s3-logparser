@@ -23,6 +23,7 @@ FIELD_NAMES = [
     'referrer',
     'user_agent',
     'version_id',
+    'log_filename'
 ]
 
 DT_FMT = '%d/%b/%Y:%H:%M:%S +0000'
@@ -36,10 +37,10 @@ class LogEntry(object):
         for field_name in FIELD_NAMES:
             self[field_name] = kwargs.get(field_name)
     @classmethod
-    def entries_from_logfile(cls, logfile):
+    def entries_from_logfile(cls, logfile, log_fn):
         for line in logfile.content.splitlines():
             line = line.strip('\n')
-            yield cls(line)
+            yield cls(line, log_filename=log_fn)
     def parse_line(self, line):
         def iter_fields(_line):
             found = False
@@ -90,9 +91,11 @@ class LogEntry(object):
         elif field_name in ['tx_bytes', 'object_size']:
             value = int(value)
         return value
-    def _serialize(self, dt_to_str=False):
+    def _serialize(self, dt_to_str=False, log_filename=True):
         d = {}
         for key, val in self._fields.items():
+            if key == 'log_filename' and log_filename is False:
+                continue
             if isinstance(val, datetime.datetime) and dt_to_str:
                 val = val.strftime(DT_FMT)
             elif isinstance(val, datetime.timedelta):
