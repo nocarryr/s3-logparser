@@ -49,7 +49,7 @@ class LogBucketSource(Bucket):
         self.logging_status = kwargs.get('logging_status')
         if self.logging_status is None:
             self.logging_status = self.bucket.get_logging_status()
-        if self.config is not None:
+        if self.config is not None and self.config.name != self.bucket_name:
             sections = ['buckets', 'log_sources', self.bucket_name]
             self.config = self.config.root.section(*sections)
             for key in ['target', 'prefix']:

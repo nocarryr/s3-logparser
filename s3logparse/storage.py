@@ -6,17 +6,15 @@ from s3logparse.backends import build_backend
 
 class LogStorage(object):
     def __init__(self, config):
-        self.config = config.root.section('log_storage')
+        self.config = config.log_storage
         self.config.setdefault('skip_search', False)
         self.config.setdefault('delete_logfiles', True)
         self.backend = build_backend(config)
         self.bucket_sources = {}
-        conf_buckets = self.config.get('bucket_sources')
+        conf_buckets = config.get('buckets', {}).get('log_sources')
         if conf_buckets is not None:
             for key, val in conf_buckets.items():
-                bkwargs = val.copy()
-                bkwargs.setdefault('config', config)
-                b = LogBucketSource(**bkwargs)
+                b = LogBucketSource(bucket_name=key, config=val)
                 self.bucket_sources[b.bucket_name] = b
         if not self.config.get('skip_search'):
             self.get_buckets()
