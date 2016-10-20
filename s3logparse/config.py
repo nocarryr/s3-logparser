@@ -82,6 +82,30 @@ class ConfigSection(object):
         except KeyError:
             pass
         raise AttributeError
+    def __iter__(self):
+        for key in self.sections.keys():
+            yield key
+        for key in self._data.keys():
+            if key not in self.sections:
+                yield key
+    def keys(self):
+        for key in self:
+            yield key
+    def items(self):
+        for key in self:
+            yield key, self[key]
+    def values(self):
+        for key in self:
+            yield self[key]
+    def copy(self):
+        d = {}
+        for key, val in self.items():
+            if isinstance(val, (ConfigSection, dict)):
+                val = val.copy()
+            else:
+                val = type(val)(val)
+            d[key] = val
+        return d
     def get(self, name, default=None):
         try:
             return self[name]
