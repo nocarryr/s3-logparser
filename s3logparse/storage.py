@@ -31,20 +31,19 @@ class LogStorage(object):
                 count = 0
                 existing = 0
                 for log_fn, logfile in src.iter_logfiles():
-                    entries = set([e for e in LogEntry.entries_from_logfile(logfile, log_fn)])
-                    for entry in entries.copy():
-                        r = self.backend.search(name, filt=entry._serialize(log_filename=False))
+                    delete_ok = True
+                    for entry in LogEntry.entries_from_logfile(logfile, log_fn):
+                        r = self.backend.search(name, filt={'request_id':entry.request_id})
                         if r.count():
                             existing += 1
-                            entries.discard(entry)
-                    _count = self.backend.add_entries(name, *[e._serialize() for e in entries])
-                    if _count == len(entries):
-                        to_delete.add(logfile)
-                    count += _count
+                            continue
+                        r = self.backend.add_entry(name, entry._serialize())
+                        if r is False:
+                            delete_ok = False
+                        else:
+                            count += 1
+                    if delete_ok and self.config.delete_logfiles:
+                        print('deleting logfile {}'.format(logfile))
+                        logfile.delete()
                 print('skipped {} existing entries'.format(existing))
                 print('added {} entries to {}'.format(count, name))
-        if not self.config.delete_logfiles:
-            return
-        print('deleting {} logfiles from s3'.format(len(to_delete)))
-        for logfile in to_delete:
-            logfile.delete()
