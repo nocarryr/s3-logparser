@@ -87,7 +87,7 @@ class LogBucketTarget(Bucket):
         self.logfiles = {}
         self.sync_logfiles()
     def iter_logfiles(self):
-        for key in self.bucket.get_all_keys(prefix=self.key_prefix):
+        for key in self.bucket.list(prefix=self.key_prefix):
             yield LogFile(key=key, bucket=self)
     def delete_logfiles(*args):
         for arg in args:

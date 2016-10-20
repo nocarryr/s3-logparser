@@ -37,6 +37,8 @@ class DummyS3Bucket(object):
         return json.loads(p.read())
     def get_logging_status(self):
         return self.logging_status
+    def list(self, prefix=None):
+        return self.get_all_keys(prefix)
     def get_all_keys(self, prefix=None):
         for p in self.path.visit():
             if p.isdir():
