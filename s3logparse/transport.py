@@ -77,7 +77,7 @@ class LogBucketSource(Bucket):
         prefix = self.logging_status.prefix
         return LogBucketTarget(bucket_name=name, key_prefix=prefix)
     def iter_logfiles(self):
-        for name, logfile in self.target.logfiles.items():
+        for name, logfile in self.target.logfiles.copy().items():
             yield name, logfile
 
 class LogBucketTarget(Bucket):
