@@ -91,7 +91,7 @@ class BackendBase(ReentrantContext):
     def unique_values(self, table_name, field_name, filt=None, **kwargs):
         with self as db:
             coll = self.get_collection(table_name)
-            return coll.unique_values(filt, field_name, **kwargs)
+            return coll.unique_values(field_name, filt, **kwargs)
 
 class LogCollectionBase(ReentrantContext):
     def __init__(self, **kwargs):
