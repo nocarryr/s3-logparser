@@ -109,11 +109,17 @@ class LogBucketTarget(Bucket):
         for key in self.bucket.list(prefix=self.key_prefix):
             yield LogFile(key=key, bucket=self)
     def delete_logfiles(self, *args):
+        keys = []
         for arg in args:
             if not isinstance(arg, LogFile):
                 arg = self.logfiles[arg]
-            arg.delete()
-        self.sync_logfiles()
+            keys.append(arg.key)
+        r = self.bucket.delete_keys(keys)
+        for deleted in r.deleted:
+            lf = self.logfiles[deleted.key]
+            self.on_logfile_deleted(lf)
+        if len(r.errors):
+            raise Exception('Key delete errors: {}'.format(r.errors))
     def on_logfile_deleted(self, logfile):
         if logfile.dt is not None and logfile.dt in self.logfiles_by_dt:
             del self.logfiles_by_dt[logfile.dt][logfile.name]
