@@ -108,7 +108,7 @@ class LogBucketTarget(Bucket):
     def iter_logfiles(self):
         for key in self.bucket.list(prefix=self.key_prefix):
             yield LogFile(key=key, bucket=self)
-    def delete_logfiles(*args):
+    def delete_logfiles(self, *args):
         for arg in args:
             if not isinstance(arg, LogFile):
                 arg = self.logfiles[arg]
