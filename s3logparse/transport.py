@@ -1,5 +1,23 @@
+import os
+import datetime
+import pytz
 import boto
 from boto.s3.connection import S3Connection
+
+UTC = pytz.utc
+
+def parse_logfile_date(filename):
+    dt_fmt = '%Y-%m-%d'
+    fn = os.path.basename(filename)
+    if len(fn) < 10:
+        return None
+    try:
+        dt = datetime.datetime.strptime(fn[:10], dt_fmt)
+    except:
+        dt = None
+    if dt is not None:
+        dt = UTC.localize(dt)
+    return dt
 
 CALLING_FORMAT = boto.config.get('s3', 'calling_format', 'boto.s3.connection.OrdinaryCallingFormat')
 def build_connection(**kwargs):
@@ -85,6 +103,7 @@ class LogBucketTarget(Bucket):
         super(LogBucketTarget, self).__init__(**kwargs)
         self.key_prefix = kwargs.get('key_prefix')
         self.logfiles = {}
+        self.logfiles_by_dt = {}
         self.sync_logfiles()
     def iter_logfiles(self):
         for key in self.bucket.list(prefix=self.key_prefix):
@@ -96,6 +115,8 @@ class LogBucketTarget(Bucket):
             arg.delete()
         self.sync_logfiles()
     def on_logfile_deleted(self, logfile):
+        if logfile.dt is not None and logfile.dt in self.logfiles_by_dt:
+            del self.logfiles_by_dt[logfile.dt][logfile.name]
         del self.logfiles[logfile.name]
     def sync_logfiles(self):
         lf_names = set()
@@ -104,7 +125,14 @@ class LogBucketTarget(Bucket):
             if lf.name in self.logfiles:
                 continue
             self.logfiles[lf.name] = lf
+            if lf.dt is not None:
+                if lf.dt not in self.logfiles_by_dt:
+                    self.logfiles_by_dt[lf.dt] = {}
+                self.logfiles_by_dt[lf.dt][lf.name] = lf
         for removed in lf_names - set(self.logfiles.keys()):
+            lf = self.logfiles[removed]
+            if lf.dt is not None and lf.dt in self.logfiles_by_dt:
+                del self.logfiles_by_dt[lf.dt][removed]
             del self.logfiles[removed]
 
 class LogFile(S3Object):
@@ -112,6 +140,7 @@ class LogFile(S3Object):
         self.key = kwargs.get('key')
         self.name = self.key.name
         self.bucket = kwargs.get('bucket')
+        self.dt = parse_logfile_date(self.name)
     @property
     def content(self):
         return self.key.get_contents_as_string()
