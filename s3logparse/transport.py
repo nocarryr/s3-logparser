@@ -156,7 +156,10 @@ class LogFile(S3Object):
         self.dt = parse_logfile_date(self.name)
     @property
     def content(self):
-        return self.key.get_contents_as_string()
+        c = getattr(self, '_content', None)
+        if c is None:
+            c = self._content = self.key.get_contents_as_string()
+        return c
     def delete(self):
         self.key.delete()
         self.key = None
