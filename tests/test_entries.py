@@ -9,7 +9,7 @@ def test_entries(fake_logs):
     fake_flat = []
     for fn, p in fake_logs['paths'].items():
         fake_entries = fake_logs['filenames'][fn]
-        s3_key = DummyS3Key(p)
+        s3_key = DummyS3Key(p, name=fn)
         log_file = LogFile(key=s3_key)
         for i, entry in enumerate(LogEntry.entries_from_logfile(log_file, fn)):
             fake_entry = fake_entries[i]
