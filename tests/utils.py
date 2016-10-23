@@ -24,6 +24,11 @@ class LoggingStatus(object):
         if self.target is not None or self.prefix is not None:
             self.LoggingEnabled = ''
 
+class DummyResult(object):
+    def __init__(self, **kwargs):
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
 class DummyS3Bucket(object):
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
@@ -48,6 +53,12 @@ class DummyS3Bucket(object):
             if prefix is not None and not keyname.startswith(prefix):
                 continue
             yield DummyS3Key(p, bucket=self, name=keyname)
+    def delete_keys(self, keys):
+        result = DummyResult(deleted=[], errors=[])
+        for key in keys:
+            key.delete()
+            result.deleted.append(DummyResult(key=key.name))
+        return result
 
 class DummyS3Key(object):
     def __init__(self, filename, bucket=None, name=None):
