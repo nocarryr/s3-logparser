@@ -95,8 +95,7 @@ class LogBucketSource(Bucket):
         prefix = self.logging_status.prefix
         return LogBucketTarget(bucket_name=name, key_prefix=prefix)
     def iter_logfiles(self):
-        for name, logfile in self.target.logfiles.copy().items():
-            yield name, logfile
+        return self.target.iter_logfiles()
 
 class LogBucketTarget(Bucket):
     def __init__(self, **kwargs):
@@ -105,9 +104,16 @@ class LogBucketTarget(Bucket):
         self.logfiles = {}
         self.logfiles_by_dt = {}
         self.sync_logfiles()
-    def iter_logfiles(self):
+    def iter_logfile_keys(self):
         for key in self.bucket.list(prefix=self.key_prefix):
-            yield LogFile(key=key, bucket=self)
+            yield key
+    def iter_logfiles(self):
+        for name in sorted(self.logfiles.copy().keys()):
+            try:
+                logfile = self.logfiles[name]
+            except KeyError:
+                continue
+            yield name, logfile
     def delete_logfiles(self, *args):
         keys = []
         for arg in args:
@@ -126,10 +132,11 @@ class LogBucketTarget(Bucket):
         del self.logfiles[logfile.name]
     def sync_logfiles(self):
         lf_names = set()
-        for lf in self.iter_logfiles():
-            lf_names.add(lf.name)
-            if lf.name in self.logfiles:
+        for key in self.iter_logfile_keys():
+            lf_names.add(key.name)
+            if key.name in self.logfiles:
                 continue
+            lf = LogFile(key=key, bucket=self)
             self.logfiles[lf.name] = lf
             if lf.dt is not None:
                 if lf.dt not in self.logfiles_by_dt:
