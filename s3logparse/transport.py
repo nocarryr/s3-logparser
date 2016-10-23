@@ -164,6 +164,10 @@ class LogFile(S3Object):
         self.key.delete()
         self.key = None
         self.bucket.on_logfile_deleted(self)
+    def __cmp__(self, other):
+        if not isinstance(other, LogFile):
+            return NotImplemented
+        return cmp(self.name, other.name)
     def __repr__(self):
         return 'LogFile: {}'.format(self)
     def __str__(self):
