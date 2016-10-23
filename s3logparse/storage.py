@@ -1,4 +1,7 @@
 import os
+import datetime
+
+import pytz
 
 from s3logparse.transport import LogBucketSource
 from s3logparse.entry import LogEntry
@@ -22,12 +25,29 @@ class LogStorage(object):
         skip_names = self.bucket_sources.keys()
         for src in LogBucketSource.iter_all(skip_names, config=self.config):
             self.bucket_sources[src.bucket_name] = src
+    def remove_parsed_logfiles(self):
+        if not self.config.delete_logfiles:
+            return
+        with self.backend:
+            for name, src in self.bucket_sources.items():
+                parsed_dts = self.backend.unique_values(name, 'datetime')
+                if not len(parsed_dts):
+                    continue
+                last_dt = max(parsed_dts) - datetime.timedelta(days=1)
+                for dt, logfiles in src.target.logfiles_by_dt.items():
+                    if not len(logfiles):
+                        continue
+                    if dt.date() >= last_dt.date():
+                        continue
+                    print('deleting logfiles for {}'.format(dt.date()))
+                    src.target.delete_logfiles(*logfiles.values())
     def store_entries(self):
         if not len(self.bucket_sources):
             self.get_buckets()
         with self.backend:
-            to_delete = set()
+            self.remove_parsed_logfiles()
             for name, src in self.bucket_sources.items():
+                to_delete = set()
                 count = 0
                 existing = 0
                 for log_fn, logfile in src.iter_logfiles():
@@ -43,7 +63,11 @@ class LogStorage(object):
                         else:
                             count += 1
                     if delete_ok and self.config.delete_logfiles:
-                        print('deleting logfile {}'.format(logfile))
-                        logfile.delete()
+                        to_delete.add(logfile)
                 print('skipped {} existing entries'.format(existing))
                 print('added {} entries to {}'.format(count, name))
+                if len(to_delete) >= 2:
+                    last_lf = max(to_delete)
+                    to_delete.discard(last_lf)
+                    print('deleting {} logfiles'.format(len(to_delete)))
+                    src.target.delete_logfiles(*to_delete)
