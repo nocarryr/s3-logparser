@@ -63,6 +63,7 @@ class ConfigSection(object):
             if key in self._data or key in self.sections:
                 raise DuplicateKeyError('{} exists in this section'.format(key))
             self.sections[key] = item
+            item.parent = self
             item_changed = True
         else:
             if key in self.sections:
@@ -100,14 +101,14 @@ class ConfigSection(object):
         for key in self:
             yield self[key]
     def copy(self):
-        d = {}
+        c = ConfigSection(self.name)
         for key, val in self.items():
             if isinstance(val, (ConfigSection, dict)):
                 val = val.copy()
             else:
                 val = type(val)(val)
-            d[key] = val
-        return d
+            c[key] = val
+        return c
     def get(self, name, default=None):
         try:
             return self[name]
