@@ -67,7 +67,9 @@ class ConfigSection(object):
         else:
             if key in self.sections:
                 raise DuplicateKeyError('{} is already a config section'.format(key))
-            if key in self._data and self._data[key] != item:
+            if key not in self._data:
+                item_changed = True
+            elif self._data[key] != item:
                 item_changed = True
             self._data[key] = item
         if item_changed and self._initialized:

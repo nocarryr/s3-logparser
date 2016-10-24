@@ -16,9 +16,7 @@ def test_config(tmpdir):
         for y in range(5):
             section[chr(y+65)] = y
             d[section.dotted_name][chr(y+65)] = y
-        # TODO: figure out why this fails
-        if section.name != 'main':
-            assert section.has_changes
+        assert section.has_changes
         name = 'section_{}'.format(x)
         section = section.section(name)
     assert c.has_changes
