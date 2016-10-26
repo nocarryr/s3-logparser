@@ -1,4 +1,5 @@
 import os
+import functools
 import datetime
 import pytz
 import boto
@@ -148,6 +149,7 @@ class LogBucketTarget(Bucket):
                 del self.logfiles_by_dt[lf.dt][removed]
             del self.logfiles[removed]
 
+@functools.total_ordering
 class LogFile(S3Object):
     def __init__(self, **kwargs):
         self.key = kwargs.get('key')
@@ -164,22 +166,14 @@ class LogFile(S3Object):
         self.key.delete()
         self.key = None
         self.bucket.on_logfile_deleted(self)
-    def __gte__(self, other):
+    def __eq__(self, other):
         if not isinstance(other, LogFile):
-            return NotImplemented
-        return self.name >= other.name
-    def __gt__(self, other):
-        if not isinstance(other, LogFile):
-            return NotImplemented
-        return self.name > other.name
+            return NotImplemented #pragma: no cover
+        return self.name == other.name
     def __lt__(self, other):
         if not isinstance(other, LogFile):
-            return NotImplemented
+            return NotImplemented #pragma: no cover
         return self.name < other.name
-    def __lte__(self, other):
-        if not isinstance(other, LogFile):
-            return NotImplemented
-        return self.name <= other.name
     def __repr__(self):
         return 'LogFile: {}'.format(self)
     def __str__(self):
