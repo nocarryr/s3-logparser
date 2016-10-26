@@ -174,6 +174,8 @@ class LogFile(S3Object):
         if not isinstance(other, LogFile):
             return NotImplemented #pragma: no cover
         return self.name < other.name
+    def __hash__(self):
+        return super(LogFile, self).__hash__()
     def __repr__(self):
         return 'LogFile: {}'.format(self)
     def __str__(self):
