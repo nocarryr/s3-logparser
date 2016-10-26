@@ -1,3 +1,9 @@
 [run]
 source = s3logparse
 parallel = True
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
