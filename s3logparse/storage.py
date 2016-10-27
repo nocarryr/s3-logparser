@@ -34,10 +34,11 @@ class LogStorage(object):
                 if not len(parsed_dts):
                     continue
                 last_dt = max(parsed_dts) - datetime.timedelta(days=1)
+                max_dt = max(src.target.logfiles_by_dt.keys())
                 for dt, logfiles in src.target.logfiles_by_dt.items():
                     if not len(logfiles):
                         continue
-                    if dt.date() >= last_dt.date():
+                    if dt.date() >= last_dt.date() or dt.date() >= max_dt.date():
                         continue
                     print('deleting logfiles for {}'.format(dt.date()))
                     src.target.delete_logfiles(*logfiles.values())
