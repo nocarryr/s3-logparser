@@ -116,7 +116,34 @@ def test_dbops(dbstore):
 def test_main(main_argv_override):
     from s3logparse.main import Config, LogStorage, main
 
+    def get_logfiles(store, flat=True):
+        if flat:
+            logfiles = []
+        else:
+            logfiles = {}
+        for name, src in store.bucket_sources.items():
+            for log_fn, logfile in src.iter_logfiles():
+                if flat:
+                    logfiles.append(logfile)
+                else:
+                    if name not in logfiles:
+                        logfiles[name] = {}
+                    logfiles[name][log_fn] = logfile
+        return logfiles
+
+    store = main_argv_override['store']
+    store.config['delete_logfiles'] = False
+    assert store.config.has_changes
+    store.config.write()
+
+    logfiles = get_logfiles(store)
+    logfiles_by_bucket = get_logfiles(store, flat=False)
+
     main()
+
+    # make sure the files were not deleted
+    for logfile in logfiles:
+        assert logfile.key.filename.check()
 
     conf_fn = main_argv_override['conf_fn']
     c = Config(str(conf_fn))
@@ -125,3 +152,25 @@ def test_main(main_argv_override):
     store = LogStorage(c)
     main_argv_override['store'] = store
     check_entries(**main_argv_override)
+
+    store.config['delete_logfiles'] = True
+    assert store.config.has_changes
+    store.config.write()
+
+    # one more run with delete_logfiles set to true
+    c = Config(str(conf_fn))
+    store = LogStorage(c)
+    assert len(logfiles) == len(get_logfiles(store))
+    store.store_entries()
+
+    main_argv_override['store'] = store
+    check_entries(**main_argv_override)
+
+    # now check that the correct files were deleted
+    last_lfs = [max(lfs.keys()) for lfs in logfiles_by_bucket.values()]
+    for logfile in logfiles:
+        exists = logfile.key.filename.check()
+        if logfile.name in last_lfs:
+            assert exists
+        else:
+            assert not exists
