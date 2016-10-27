@@ -24,12 +24,6 @@ def build_connection(**kwargs):
     kwargs.setdefault('calling_format', CALLING_FORMAT)
     return S3Connection(**kwargs)
 
-def iter_logfiles(bucket_name, prefix=None):
-    c = build_connection()
-    b = c.get_bucket(bucket_name)
-    for key in b.get_all_keys(prefix=prefix):
-        yield key
-
 
 class S3Object(object):
     @property
