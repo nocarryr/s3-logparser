@@ -49,7 +49,7 @@ class DummyS3Bucket(object):
             if p.isdir():
                 continue
             c = p.common(self.path)
-            keyname = str(p).lstrip(str(c)).lstrip('/')
+            keyname = '/'.join([self.path.basename, p.basename])
             if prefix is not None and not keyname.startswith(prefix):
                 continue
             yield DummyS3Key(p, bucket=self, name=keyname)
