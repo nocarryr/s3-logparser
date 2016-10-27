@@ -75,13 +75,12 @@ def test_storage(dbstore):
                     if k != 'log_filename':
                         assert db_entry[k] == v
 
-def test_dbops(dbstore):
+def check_entries(**kwargs):
     from s3logparse.entry import FIELD_NAMES
     all_fields = set(FIELD_NAMES)
-    store = dbstore['store']
-    store.store_entries()
-    fake_entries = dbstore['entries']
-    coll_names = dbstore['source_bucket_names']
+    store = kwargs['store']
+    fake_entries = kwargs['entries']
+    coll_names = kwargs['source_bucket_names']
     field_names = ['user_agent', 'operation', 'key_name']
     fake_fields = {}
     for key, d in fake_entries.items():
@@ -109,44 +108,20 @@ def test_dbops(dbstore):
                 q = coll.unique_values(field)
                 assert len(q) == len(fake_fields[coll_name][field])
 
+def test_dbops(dbstore):
+    store = dbstore['store']
+    store.store_entries()
+    check_entries(**dbstore)
+
 def test_main(main_argv_override):
     from s3logparse.main import Config, LogStorage, main
-    from s3logparse.entry import FIELD_NAMES
-    all_fields = set(FIELD_NAMES)
 
     main()
 
-    fake_entries = main_argv_override['entries']
     conf_fn = main_argv_override['conf_fn']
     c = Config(str(conf_fn))
 
     # build a new storage object to collect the entries stored by the main script
     store = LogStorage(c)
-
-    coll_names = main_argv_override['source_bucket_names']
-    field_names = ['user_agent', 'operation', 'key_name']
-    fake_fields = {}
-    for key, d in fake_entries.items():
-        bucket_name = key.replace('target', 'source')
-        if bucket_name not in fake_fields:
-            fake_fields[bucket_name] = {}
-        for e in d.values():
-            for field in field_names:
-                if field not in fake_fields[bucket_name]:
-                    fake_fields[bucket_name][field] = set()
-                val = e.fields[field]
-                fake_fields[bucket_name][field].add(val)
-    with store.backend:
-        for coll_name in coll_names:
-            coll = store.backend.get_collection(coll_name)
-            dbfields = set(coll.get_fields())
-
-            # remove any fields added by backend (_id or pk fields)
-            # we only want to make sure the fields we want exist
-            extra_fields = dbfields - all_fields
-            dbfields -= extra_fields
-            assert dbfields == all_fields
-
-            for field in field_names:
-                q = coll.unique_values(field)
-                assert len(q) == len(fake_fields[coll_name][field])
+    main_argv_override['store'] = store
+    check_entries(**main_argv_override)
