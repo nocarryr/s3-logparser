@@ -67,7 +67,7 @@ class LogStorage(object):
                 print('skipped {} existing entries'.format(existing))
                 print('added {} entries to {}'.format(count, name))
                 if len(to_delete) >= 2:
-                    last_lf = max((lf.name for lf in to_delete))
-                    to_delete.discard(last_lf)
+                    to_delete = {lf.name:lf for lf in to_delete}
+                    del to_delete[max(to_delete.keys())]
                     print('deleting {} logfiles'.format(len(to_delete)))
-                    src.target.delete_logfiles(*to_delete)
+                    src.target.delete_logfiles(*to_delete.values())
